@@ -13,6 +13,7 @@ const History = () => {
     { id: 2, name: "Hans", message: "Oke siapp" },
     { id: 3, name: "Ryan", message: "Mantapp bro" },
     { id: 4, name: "Hadi", message: "Sini kumpul ngab" },
+    { id: 5, name: "Hanif", message: "Okee bro" },
   ]);
 
   const renderChatItem = ({ item }) => {
