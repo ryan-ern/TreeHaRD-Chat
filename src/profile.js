@@ -42,7 +42,8 @@ function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.profile}>
+      <View style={styles.box}>
+        <View style={styles.profile}>
         <Image
           source={{
             uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4wdTmZ9xZLBleRVhe7weMhdq-HuuvcMVdUg&usqp=CAU",
@@ -59,6 +60,8 @@ function ProfileScreen() {
           </TouchableOpacity>
         )}
       </View>
+      </View>
+      
       {editing && (
         <View style={styles.editForm}>
           <Text style={styles.heading}>Edit Profile</Text>
@@ -101,6 +104,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFD3B0",
     alignItems: "center",
     justifyContent: "center",
+  },
+  box: {
+    width: 200,
+    height: 200,
+    backgroundColor: 'red',
+    borderRadius: 10,
   },
   profile: {
     alignItems: "center",
