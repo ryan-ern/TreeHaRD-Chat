@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   box: {
-    width: 200,
+    width: 400,
     height: 200,
     backgroundColor: 'red',
     borderRadius: 10,
