@@ -7,12 +7,14 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
+import Modal from "react-native-modal";
+import { FontAwesome } from "react-native-vector-icons";
 
 function ProfileScreen() {
-  const [name, setName] = useState("Nama Lengkap");
-  const [gender, setGender] = useState("Jenis Kelamin");
-  const [biodata, setBiodata] = useState("Bio");
-  const [note, setNote] = useState("Note:");
+  const [name, setName] = useState("Ryan");
+  const [gender, setGender] = useState("Laki Laki");
+  const [Bio, setBio] = useState("Sedang PAM");
+  const [note, setNote] = useState("ini note apa saja yang ingin disimpan");
   const [editing, setEditing] = useState(false);
 
   function handleNameChange(text) {
@@ -23,8 +25,8 @@ function ProfileScreen() {
     setGender(text);
   }
 
-  function handleBiodataChange(text) {
-    setBiodata(text);
+  function handleBioChange(text) {
+    setBio(text);
   }
 
   function handleNoteChange(text) {
@@ -42,116 +44,251 @@ function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.profile}>
-        <Image
-          source={{
-            uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4wdTmZ9xZLBleRVhe7weMhdq-HuuvcMVdUg&usqp=CAU",
-          }}
-          style={styles.avatar}
-        />
-        <Text style={styles.name}>{name}</Text>
-        <Text style={styles.gender}>{gender}</Text>
-        <Text style={styles.biodata}>{biodata}</Text>
-        <Text style={styles.note}>{note}</Text>
-        {!editing && (
-          <TouchableOpacity onPress={handleEditProfile}>
-            <Text style={styles.editButton}>Edit Profile</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-      {editing && (
-        <View style={styles.editForm}>
-          <Text style={styles.heading}>Edit Profile</Text>
-          <TextInput
-            style={styles.input}
-            value={name}
-            onChangeText={handleNameChange}
-            placeholder="Name"
+      <View style={styles.header}>
+        <View style={styles.containerProfile}>
+          {!editing && (
+            <TouchableOpacity
+              onPress={handleEditProfile}
+              style={styles.editButton}
+            >
+              <FontAwesome name="edit" size={25} color={"#3d3d3d"} />
+            </TouchableOpacity>
+          )}
+          <Text style={styles.name}>{name}</Text>
+          <Image
+            source={{
+              uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4wdTmZ9xZLBleRVhe7weMhdq-HuuvcMVdUg&usqp=CAU",
+            }}
+            style={styles.avatar}
           />
-          <TextInput
-            style={styles.input}
-            value={gender}
-            onChangeText={handleGenderChange}
-            placeholder="Gender"
-          />
-          <TextInput
-            style={styles.input}
-            value={biodata}
-            onChangeText={handleBiodataChange}
-            placeholder="Biodata"
-          />
-          <TextInput
-            style={styles.input}
-            value={note}
-            onChangeText={handleNoteChange}
-            placeholder="Note"
-          />
-          <TouchableOpacity onPress={handleSaveProfile}>
-            <Text style={styles.saveButton}>Save</Text>
-          </TouchableOpacity>
+          <Text style={styles.gender}>{gender}</Text>
+          <Text style={styles.Bio}>{Bio}</Text>
         </View>
-      )}
+        <View style={styles.noteContainer}>
+          <View style={styles.headerNoteContainer}>
+            <Text style={styles.headerNote}>Note:</Text>
+            <FontAwesome name="sticky-note" size={25} color={"#3d3d3d"} />
+          </View>
+          <Text style={styles.note}>{note}</Text>
+        </View>
+        <View style={styles.calenderContainer}>
+          <View style={styles.headerCalenderContainer}>
+            <Text style={styles.headerCalender}>Kalender:</Text>
+            <FontAwesome name="calendar" size={25} color={"#3d3d3d"} />
+          </View>
+          <Text style={styles.calender}>12</Text>
+        </View>
+      </View>
+
+      <Modal
+        isVisible={editing}
+        animationIn="slideInUp"
+        animationOut="slideOutDown"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.heading}>Edit Profile</Text>
+            <Text style={styles.label}>Nama</Text>
+            <TextInput
+              style={styles.input}
+              value={name}
+              onChangeText={handleNameChange}
+              placeholder="Name"
+            />
+            <Text style={styles.label}>Jenis Kelamin</Text>
+            <TextInput
+              style={styles.input}
+              value={gender}
+              onChangeText={handleGenderChange}
+              placeholder="Gender"
+            />
+            <Text style={styles.label}>Bio</Text>
+            <TextInput
+              style={styles.input}
+              value={Bio}
+              onChangeText={handleBioChange}
+              placeholder="Bio"
+            />
+            <Text style={styles.label}>Note</Text>
+            <TextInput
+              style={styles.input}
+              value={note}
+              onChangeText={handleNoteChange}
+              placeholder="Note"
+            />
+            <TouchableOpacity onPress={handleSaveProfile}>
+              <Text style={styles.saveButton}>Save</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 3,
-    backgroundColor: "#FFD3B0",
+    flex: 1,
+    backgroundColor: "#fff9de",
     alignItems: "center",
-    justifyContent: "center",
   },
-  profile: {
+  header: {
     alignItems: "center",
-    margin: 50,
+    backgroundColor: "#ff6969",
+    marginTop: "10%",
+    width: "100%",
+    height: "50%",
+  },
+  containerProfile: {
+    position: "relative",
+    width: "80%",
+    backgroundColor: "#ffd3b0",
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: "-40%",
+    marginTop: "10%",
+    alignSelf: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 10,
   },
   avatar: {
-    width: 50,
-    height: 50,
+    width: 100,
+    height: 100,
     borderRadius: 100,
     marginBottom: 30,
   },
   name: {
     fontSize: 20,
     marginBottom: 10,
+    textAlign: "center",
+    fontWeight: "bold",
   },
   gender: {
     fontSize: 20,
     marginBottom: 10,
+    textAlign: "center",
+    fontWeight: "bold",
   },
-  biodata: {
-    fontSize: 20,
+  Bio: {
+    fontSize: 15,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  noteContainer: {
+    width: "80%",
+    top: "45%",
+    backgroundColor: "#ffd3b0",
+    borderRadius: 10,
+    padding: 20,
+    marginTop: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  headerNoteContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 10,
   },
+  headerNote: {
+    fontSize: 15,
+    alignSelf: "flex-start",
+    fontWeight: "bold",
+  },
   note: {
+    fontSize: 15,
+    alignSelf: "flex-start",
+    marginLeft: 15,
+  },
+  calenderContainer: {
+    width: "80%",
+    top: "45%",
+    backgroundColor: "#ffd3b0",
+    borderRadius: 10,
+    padding: 20,
+    marginTop: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  headerCalenderContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  headerCalender: {
+    fontSize: 15,
+    alignSelf: "flex-start",
+    fontWeight: "bold",
+  },
+  calender: {
     fontSize: 20,
+    alignSelf: "center",
+    marginLeft: 15,
+    fontWeight: "bold",
   },
   editButton: {
     fontSize: 20,
     color: "blue",
-  },
-  editForm: {
-    alignItems: "center",
-    marginTop: 10,
+    alignSelf: "flex-end",
+    marginRight: 10,
+    marginTop: 5,
   },
   heading: {
     fontSize: 24,
     marginBottom: 20,
+    textAlign: "center",
   },
   input: {
-    width: 300,
+    width: "100%",
     height: 40,
     marginVertical: 10,
-    padding: 10,
+    paddingHorizontal: 10,
     borderRadius: 5,
-    borderWidth: 3,
+    borderWidth: 1,
     borderColor: "#A6D0DD",
+  },
+  label: {
+    alignSelf: "flex-start",
+    marginBottom: -10,
   },
   saveButton: {
     fontSize: 18,
     color: "blue",
     marginTop: 20,
+    textAlign: "center",
+  },
+  modalContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+    width: "100%",
   },
 });
 
