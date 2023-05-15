@@ -6,17 +6,23 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
+  Linking,
 } from "react-native";
 import { Feather } from "react-native-vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
 const NewsDetail = ({ route }) => {
-  const { title, author, image, content } = route.params;
+  const { title, author, image, content, url } = route.params;
   const navigation = useNavigation();
 
   const navigateBack = () => {
     navigation.navigate("Home");
   };
+
+  const openLink = () => {
+    Linking.openURL(url);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -34,6 +40,9 @@ const NewsDetail = ({ route }) => {
           <Image source={{ uri: image }} style={styles.image} />
           <Text style={styles.author}>By {author}</Text>
           <Text style={styles.content}>{content}</Text>
+          <TouchableOpacity style={styles.readMoreBtn} onPress={openLink}>
+            <Text style={styles.readMoreText}>Baca Selengkapnya</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>
@@ -83,6 +92,17 @@ const styles = StyleSheet.create({
   content: {
     fontSize: 18,
     lineHeight: 28,
+  },
+  readMoreBtn: {
+    marginTop: 20,
+    backgroundColor: "#a6d0dd",
+    padding: 10,
+    borderRadius: 10,
+  },
+  readMoreText: {
+    fontSize: 16,
+    color: "#fff9de",
+    textAlign: "center",
   },
 });
 

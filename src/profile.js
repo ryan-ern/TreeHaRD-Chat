@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import Modal from "react-native-modal";
 import { FontAwesome } from "react-native-vector-icons";
+import { Calendar } from "react-native-calendars";
 
 function ProfileScreen() {
   const [name, setName] = useState("Ryan");
@@ -16,6 +17,18 @@ function ProfileScreen() {
   const [Bio, setBio] = useState("Sedang PAM");
   const [note, setNote] = useState("ini note apa saja yang ingin disimpan");
   const [editing, setEditing] = useState(false);
+  const currentDate = new Date();
+  const formattedDate = currentDate.toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const [isCalendarModalVisible, setCalendarModalVisible] = useState(false);
+  const [isEditModalVisible, setEditModalVisible] = useState(false);
+
+  function toggleCalendarModal() {
+    setCalendarModalVisible(!isCalendarModalVisible);
+  }
 
   function handleNameChange(text) {
     setName(text);
@@ -34,12 +47,16 @@ function ProfileScreen() {
   }
 
   function handleEditProfile() {
-    setEditing(true);
+    setEditModalVisible(true);
   }
 
   function handleSaveProfile() {
-    setEditing(false);
+    setEditModalVisible(false);
     alert("Profile Updated!");
+  }
+
+  function toggleEditModal() {
+    setEditModalVisible(!isEditModalVisible);
   }
 
   return (
@@ -74,19 +91,27 @@ function ProfileScreen() {
         <View style={styles.calenderContainer}>
           <View style={styles.headerCalenderContainer}>
             <Text style={styles.headerCalender}>Kalender:</Text>
-            <FontAwesome name="calendar" size={25} color={"#3d3d3d"} />
+            <TouchableOpacity onPress={toggleCalendarModal}>
+              <FontAwesome name="calendar" size={25} color={"#3d3d3d"} />
+            </TouchableOpacity>
           </View>
-          <Text style={styles.calender}>12</Text>
+          <Text style={styles.calender}>{formattedDate}</Text>
         </View>
       </View>
 
       <Modal
-        isVisible={editing}
+        isVisible={isEditModalVisible}
         animationIn="slideInUp"
         animationOut="slideOutDown"
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
+            <TouchableOpacity
+              onPress={toggleEditModal}
+              style={styles.closeButton}
+            >
+              <FontAwesome name="close" size={20} color={"#3d3d3d"} />
+            </TouchableOpacity>
             <Text style={styles.heading}>Edit Profile</Text>
             <Text style={styles.label}>Nama</Text>
             <TextInput
@@ -119,6 +144,24 @@ function ProfileScreen() {
             <TouchableOpacity onPress={handleSaveProfile}>
               <Text style={styles.saveButton}>Save</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        isVisible={isCalendarModalVisible}
+        animationIn="slideInUp"
+        animationOut="slideOutDown"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity
+              onPress={toggleCalendarModal}
+              style={styles.closeButton}
+            >
+              <FontAwesome name="close" size={20} color={"#3d3d3d"} />
+            </TouchableOpacity>
+            <Text style={styles.heading}>Kalender</Text>
+            <Calendar />
           </View>
         </View>
       </Modal>
@@ -289,6 +332,15 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "center",
     width: "100%",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 5,
+    right: 10,
+  },
+  closeButtonText: {
+    fontSize: 18,
+    color: "blue",
   },
 });
 

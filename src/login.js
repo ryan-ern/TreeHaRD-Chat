@@ -3,55 +3,51 @@ import { View, Text, TextInput, Button, StyleSheet, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { auth } from "../config";
 
-const Regis = () => {
-  const [nama, setName] = useState("");
+const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigation = useNavigation();
 
-  const handleLogin = () => {
-    navigation.navigate("Login");
+  const handleRegister = () => {
+    navigation.navigate("Regis");
   };
 
-  const handleRegister = () => {
+  const handleLogin = () => {
     auth
-      .createUserWithEmailAndPassword(email, password)
+      .signInWithEmailAndPassword(email, password)
       .then((userCredential) => {
-        // Registration successful, navigate to the desired screen
+        // Login successful, navigate to the desired screen
         navigation.navigate("TabNavigator");
       })
       .catch((error) => {
-        // Handle registration error
-        console.log("Registration failed", error);
+        // Handle login error
+        console.log("Login failed", error);
       });
   };
 
   return (
     <View style={styles.container}>
       <Image style={styles.image} source={require("../assets/Logo-2.png")} />
-      <Text style={styles.title}>REGISTER</Text>
+
+      <Text style={styles.title}>LOGIN</Text>
+
       <TextInput
         style={styles.input}
-        placeholder="Nama"
-        value={nama}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="email"
+        placeholder="Email"
         value={email}
         onChangeText={setEmail}
       />
       <TextInput
         style={styles.input}
-        placeholder="password"
+        placeholder="Password"
+        secureTextEntry
         value={password}
         onChangeText={setPassword}
-        secureTextEntry
       />
-      <Button title="Register" onPress={handleRegister} />
-      <Text style={styles.or}>Or</Text>
+
       <Button title="Login" onPress={handleLogin} />
+      <Text style={styles.or}>Or</Text>
+      <Button title="Register" onPress={handleRegister} />
     </View>
   );
 };
@@ -63,13 +59,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#fff9de",
   },
-  or: {
-    margin: 20,
-  },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
+  },
+  or: {
+    margin: 20,
   },
   input: {
     width: "80%",
@@ -85,4 +81,5 @@ const styles = StyleSheet.create({
     height: 200,
   },
 });
-export default Regis;
+
+export default Login;

@@ -8,24 +8,49 @@ import {
   Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+import React, { useState, useEffect } from "react";
 
 export default function Home() {
   const navigation = useNavigation();
+  const [newsData, setNewsData] = useState([]);
+
   const start = () => {
     navigation.navigate("Chat");
   };
-  const detail = () => {
+
+  const fetchNews = async () => {
+    try {
+      const response = await axios.get(
+        "https://newsapi.org/v2/everything?q=chat&apiKey=2cec721a651f4b1a80436877904cba3b"
+      );
+      const news = response.data.articles;
+      return news;
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  };
+
+  const detail = (news) => {
     navigation.navigate("NewsDetail", {
-      title: "PAN Klaim Diajak PDIP Usung Ganjar di Pilpres 2024",
-      author: "Penulis Berita",
-      image:
-        "https://akcdn.detik.net.id/visual/2019/05/04/671d0acf-5104-4c2a-bee2-ace611b5402c_169.jpeg?w=650&q=90",
-      content:
-        "Eddy mengatakan ajakan itu disampaikan oleh Sekjen PDIP Hastro Kristiyanto setelah pengumuman Ganjar sebagai kandidat calon presiden dari partai berlambang banteng itu. Ketika kemarin Mas Ganjar ditetapkan sebagai capres, saya hubungi mas Hasto, kita ada dialog, 'Gimana kali ini PAN, ayo gabung sama PDIP untk mengusung capres yang sama'. Kurang lebih seperti itu kata-katanya,",
+      title: news.title,
+      author: news.author,
+      image: news.urlToImage,
+      content: news.content,
+      url: news.url,
     });
   };
-  const imageUrl =
-    "https://akcdn.detik.net.id/visual/2019/05/04/671d0acf-5104-4c2a-bee2-ace611b5402c_169.jpeg?w=650&q=90";
+
+  useEffect(() => {
+    const getNews = async () => {
+      const news = await fetchNews();
+      setNewsData(news);
+    };
+
+    getNews();
+  }, []);
+
   return (
     <View style={styles.container}>
       <Text style={styles.textHead}>
@@ -44,60 +69,18 @@ export default function Home() {
           <Text style={styles.headNews}>News Today</Text>
         </View>
         <View style={styles.newsWrapper}>
-          <TouchableOpacity style={styles.textNews} onPress={detail}>
-            <Image source={{ uri: imageUrl }} style={styles.image} />
-            <Text style={styles.headTextNews}>
-              PAN Klaim Diajak PDIP Usung Ganjar di Pilpres 2024
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.textNews}>
-            <Image source={{ uri: imageUrl }} style={styles.image} />
-            <Text style={styles.headTextNews}>
-              PAN Klaim Diajak PDIP Usung Ganjar di Pilpres 2024
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.textNews}>
-            <Image source={{ uri: imageUrl }} style={styles.image} />
-            <Text style={styles.headTextNews}>
-              PAN Klaim Diajak PDIP Usung Ganjar di Pilpres 2024
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.textNews}>
-            <Image source={{ uri: imageUrl }} style={styles.image} />
-            <Text style={styles.headTextNews}>
-              PAN Klaim Diajak PDIP Usung Ganjar di Pilpres 2024
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.textNews}>
-            <Image source={{ uri: imageUrl }} style={styles.image} />
-            <Text style={styles.headTextNews}>
-              PAN Klaim Diajak PDIP Usung Ganjar di Pilpres 2024
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.textNews}>
-            <Image source={{ uri: imageUrl }} style={styles.image} />
-            <Text style={styles.headTextNews}>
-              PAN Klaim Diajak PDIP Usung Ganjar di Pilpres 2024
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.textNews}>
-            <Image source={{ uri: imageUrl }} style={styles.image} />
-            <Text style={styles.headTextNews}>
-              PAN Klaim Diajak PDIP Usung Ganjar di Pilpres 2024
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.textNews}>
-            <Image source={{ uri: imageUrl }} style={styles.image} />
-            <Text style={styles.headTextNews}>
-              PAN Klaim Diajak PDIP Usung Ganjar di Pilpres 2024
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.textNews}>
-            <Image source={{ uri: imageUrl }} style={styles.image} />
-            <Text style={styles.headTextNews}>
-              PAN Klaim Diajak PDIP Usung Ganjar di Pilpres 2024
-            </Text>
-          </TouchableOpacity>
+          {newsData.map((news, index) => (
+            <TouchableOpacity
+              style={styles.textNews}
+              onPress={() => detail(news)}
+              key={index}
+            >
+              {news.urlToImage && (
+                <Image source={{ uri: news.urlToImage }} style={styles.image} />
+              )}
+              <Text style={styles.headTextNews}>{news.title}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </ScrollView>
       <StatusBar style="auto" />
@@ -164,9 +147,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 10,
     padding: 20,
+    elevation: 20,
   },
   textBtn: {
-    fontSize: 15,
+    fontSize: 20,
     color: "#FFF9DE",
+    fontWeight: "bold",
   },
 });

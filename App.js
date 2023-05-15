@@ -1,15 +1,16 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet } from "react-native";
 import Home from "./src/home";
 import Chat from "./src/chat";
 import ProfileScreen from "./src/profile";
 import Regis from "./src/regis";
 import History from "./src/history";
 import NewsDetail from "./src/news";
+import Login from "./src/login";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import { AntDesign } from "react-native-vector-icons";
+import { auth } from "./config";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -23,6 +24,7 @@ export default function App() {
           headerShown: false,
         }}
       >
+        <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Regis" component={Regis} />
         <Stack.Screen name="Chat" component={Chat} />
         <Stack.Screen name="TabNavigator" component={TabNavigator} />
