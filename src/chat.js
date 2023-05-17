@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -9,12 +9,16 @@ import {
   Alert,
 } from "react-native";
 import { Feather, SimpleLineIcons } from "react-native-vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { firebase } from "../config";
 
 const ChatScreen = () => {
   const [message, setMessage] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
   const navigation = useNavigation();
+  const route = useRoute();
+  const [targetId, setTargetId] = useState(null);
+  const flatListRef = useRef(null);
 
   const navigateBack = () => {
     navigation.navigate("History");
@@ -30,36 +34,108 @@ const ChatScreen = () => {
         },
         {
           text: "Ya",
-          onPress: () => navigation.navigate("Home"),
+          onPress: async () => {
+            // Reset targetId
+            setTargetId(null);
+
+            navigation.navigate("Home");
+          },
         },
       ],
       { cancelable: true }
     );
   };
 
+  useEffect(() => {
+    const { targetId } = route.params;
+    setTargetId(targetId);
+  }, [route.params.targetId]);
+
+  useEffect(() => {
+    const messageRef = firebase.database().ref("chats");
+    messageRef.on("value", (snapshot) => {
+      const chatData = snapshot.val();
+      if (chatData) {
+        const messages = Object.values(chatData);
+        setChatMessages(messages);
+      } else {
+        setChatMessages([]);
+      }
+    });
+
+    return () => {
+      // Hapus listener saat komponen unmount
+      messageRef.off();
+    };
+  }, []);
+
+  const scrollToBottom = () => {
+    if (flatListRef.current && chatMessages.length > 0) {
+      flatListRef.current.scrollToIndex({
+        index: chatMessages.length - 1,
+        animated: true,
+      });
+    }
+  };
+
+  useEffect(() => {
+    const messageRef = firebase.database().ref("chats");
+    messageRef.limitToLast(1).on("child_added", (snapshot) => {
+      const lastMessage = snapshot.val();
+      scrollToBottom();
+    });
+
+    return () => {
+      // Hapus listener saat komponen unmount
+      messageRef.off();
+    };
+  }, []);
+
   const handleSendMessage = () => {
-    if (message.trim() !== "") {
-      const newMessage = {
-        id: chatMessages.length + 1,
-        text: message,
-        sender: "Me",
+    const user = firebase.auth().currentUser;
+    if (user) {
+      const messageRef = firebase.database().ref("chats");
+      const newMessageRef = messageRef.push();
+      const messageBody = {
+        senderId: user.uid,
+        targetId: targetId,
+        message: message,
       };
-      setChatMessages([...chatMessages, newMessage]);
+      newMessageRef.set(messageBody);
+      console.log(messageBody);
       setMessage("");
     }
   };
 
-  const renderChatMessage = ({ item }) => (
-    <View
-      style={
-        item.sender === "Me"
-          ? styles.myMessageContainer
-          : styles.otherMessageContainer
-      }
-    >
-      <Text style={styles.messageText}>{item.text}</Text>
-    </View>
-  );
+  const renderChatMessage = ({ item }) => {
+    const currentUser = firebase.auth().currentUser;
+    const isCurrentUserSender = item.senderId === currentUser.uid;
+    const isCurrentUserTarget = item.targetId === currentUser.uid;
+
+    // Cek apakah pengguna saat ini adalah pengirim atau penerima dan berada dalam percakapan pada kedua ID tersebut
+    const isCurrentUserInConversation =
+      (isCurrentUserSender && item.targetId === targetId) ||
+      (isCurrentUserTarget && item.senderId === targetId);
+
+    // Hanya menampilkan pesan jika pengguna saat ini adalah pengirim atau penerima dan berada dalam percakapan pada kedua ID tersebut
+    if (isCurrentUserInConversation) {
+      return (
+        <View
+          style={
+            isCurrentUserSender
+              ? styles.myMessageContainer
+              : styles.otherMessageContainer
+          }
+        >
+          <Text style={styles.messageText}>{item.message}</Text>
+        </View>
+      );
+    }
+
+    return null;
+  };
+
+  // ...
 
   return (
     <View style={styles.container}>
@@ -75,9 +151,10 @@ const ChatScreen = () => {
         <SimpleLineIcons name="close" size={25} color={"#000"} />
       </TouchableOpacity>
       <FlatList
+        ref={flatListRef}
         data={chatMessages}
         renderItem={renderChatMessage}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item, index) => index.toString()}
         contentContainerStyle={styles.chatContainer}
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}

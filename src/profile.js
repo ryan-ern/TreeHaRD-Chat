@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,15 +10,16 @@ import {
 import Modal from "react-native-modal";
 import { FontAwesome } from "react-native-vector-icons";
 import { Calendar } from "react-native-calendars";
+import { firestore, firebase } from "../config";
 
 function ProfileScreen() {
-  const [name, setName] = useState("Ryan");
-  const [gender, setGender] = useState("Laki Laki");
-  const [Bio, setBio] = useState("Sedang PAM");
-  const [note, setNote] = useState("ini note apa saja yang ingin disimpan");
+  const [name, setName] = useState("");
+  const [gender, setGender] = useState(" ");
+  const [Bio, setBio] = useState(" ");
+  const [note, setNote] = useState("");
   const [editing, setEditing] = useState(false);
   const currentDate = new Date();
-  const formattedDate = currentDate.toLocaleDateString("en-US", {
+  const formattedDate = currentDate.toLocaleDateString("id-ID", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -30,30 +31,53 @@ function ProfileScreen() {
     setCalendarModalVisible(!isCalendarModalVisible);
   }
 
-  function handleNameChange(text) {
-    setName(text);
-  }
+  useEffect(() => {
+    getAccountData();
+  }, []);
 
-  function handleGenderChange(text) {
-    setGender(text);
-  }
+  const getAccountData = async () => {
+    try {
+      const user = firebase.auth().currentUser;
+      const accountRef = firestore.collection("accounts").doc(user.uid);
+      const accountSnapshot = await accountRef.get();
 
-  function handleBioChange(text) {
-    setBio(text);
-  }
-
-  function handleNoteChange(text) {
-    setNote(text);
-  }
+      if (accountSnapshot.exists) {
+        const accountData = accountSnapshot.data();
+        setName(accountData.name);
+        setGender(accountData.gender);
+        setBio(accountData.bio);
+        setNote(accountData.note);
+      } else {
+        console.log("Account does not exist");
+      }
+    } catch (error) {
+      console.log("Error getting account data: ", error);
+    }
+  };
 
   function handleEditProfile() {
     setEditModalVisible(true);
   }
 
-  function handleSaveProfile() {
-    setEditModalVisible(false);
-    alert("Profile Updated!");
-  }
+  const handleSaveProfile = async () => {
+    try {
+      const user = firebase.auth().currentUser;
+      const accountRef = firestore.collection("accounts").doc(user.uid);
+
+      // Update data pada dokumen akun
+      await accountRef.update({
+        name: name,
+        gender: gender,
+        bio: Bio,
+        note: note,
+      });
+
+      alert("Profile updated successfully!");
+      setEditModalVisible(false);
+    } catch (error) {
+      alert("Error updating profile: ", error);
+    }
+  };
 
   function toggleEditModal() {
     setEditModalVisible(!isEditModalVisible);
@@ -117,28 +141,28 @@ function ProfileScreen() {
             <TextInput
               style={styles.input}
               value={name}
-              onChangeText={handleNameChange}
+              onChangeText={setName}
               placeholder="Name"
             />
             <Text style={styles.label}>Jenis Kelamin</Text>
             <TextInput
               style={styles.input}
               value={gender}
-              onChangeText={handleGenderChange}
+              onChangeText={setGender}
               placeholder="Gender"
             />
             <Text style={styles.label}>Bio</Text>
             <TextInput
               style={styles.input}
               value={Bio}
-              onChangeText={handleBioChange}
+              onChangeText={setBio}
               placeholder="Bio"
             />
             <Text style={styles.label}>Note</Text>
             <TextInput
               style={styles.input}
               value={note}
-              onChangeText={handleNoteChange}
+              onChangeText={setNote}
               placeholder="Note"
             />
             <TouchableOpacity onPress={handleSaveProfile}>

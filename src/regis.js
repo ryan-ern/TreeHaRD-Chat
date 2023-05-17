@@ -1,11 +1,21 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, Image } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { auth } from "../config";
+import { auth, firestore } from "../config";
 
 const Regis = () => {
-  const [nama, setName] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [gender, setGender] = useState("");
+  const [note, setNote] = useState("");
+  const [bio, setBio] = useState("");
   const [password, setPassword] = useState("");
   const navigation = useNavigation();
 
@@ -17,14 +27,64 @@ const Regis = () => {
     auth
       .createUserWithEmailAndPassword(email, password)
       .then((userCredential) => {
-        // Registration successful, navigate to the desired screen
-        navigation.navigate("TabNavigator");
+        const user = userCredential.user;
+        // Membuat referensi koleksi 'accounts' di Firestore
+        const accountsCollection = firestore.collection("accounts");
+        // Menambahkan dokumen baru dengan ID pengguna
+        accountsCollection
+          .doc(user.uid)
+          .set({
+            name: name,
+            gender: gender,
+            note: note,
+            bio: bio,
+          })
+          .then(() => {
+            // Registrasi berhasil, navigasikan ke layar yang diinginkan
+            navigation.navigate("Login");
+          })
+          .catch((error) => {
+            // Tangani kesalahan penyimpanan data
+            alert("Failed to save account data", error);
+          });
       })
       .catch((error) => {
-        // Handle registration error
-        console.log("Registration failed", error);
+        // Tangani kesalahan registrasi
+        alert("Registration failed", error);
+        console.log(error);
       });
   };
+
+  // useEffect(() => {
+  //   const messageRef = firebase.database().ref("chats");
+  //   messageRef.limitToLast(1).on("child_added", (snapshot) => {
+  //     const lastMessage = snapshot.val();
+  //     console.log(lastMessage);
+  //   });
+  // });
+
+  // const send = () => {
+  // const user = firebase.auth().currentUser;
+  // const uid = "IPrawPkTIIbobAbFHUiJUy85mOv1";
+  // const messageRef = firebase.database().ref("chats");
+  // const newMessageRef = messageRef.push();
+  // const databaseRef = firebase.database().ref("users");
+  // databaseRef
+  //   .child(uid)
+  //   .once("value")
+  //   .then((snapshot) => {
+  //     const user = snapshot.val();
+  //     console.log(user);
+  //   })
+  //   .catch((error) => {
+  //     console.log(error);
+  //   });
+  // newMessageRef.set({
+  //   text: "last",
+  //   timestamp: "123",
+  // sender: firebase.database().ref(uid),
+  // });
+  // };
 
   return (
     <View style={styles.container}>
@@ -33,7 +93,7 @@ const Regis = () => {
       <TextInput
         style={styles.input}
         placeholder="Nama"
-        value={nama}
+        value={name}
         onChangeText={setName}
       />
       <TextInput
@@ -49,9 +109,34 @@ const Regis = () => {
         onChangeText={setPassword}
         secureTextEntry
       />
-      <Button title="Register" onPress={handleRegister} />
-      <Text style={styles.or}>Or</Text>
-      <Button title="Login" onPress={handleLogin} />
+      <TextInput
+        style={styles.input}
+        placeholder="Jenis Kelamin"
+        value={gender}
+        onChangeText={setGender}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Bio"
+        value={bio}
+        onChangeText={setBio}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Note/Status"
+        value={note}
+        onChangeText={setNote}
+      />
+      <TouchableOpacity style={styles.mainButton} onPress={handleRegister}>
+        <Text style={styles.buttonText}>Register</Text>
+      </TouchableOpacity>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Are you Registered? Let's Login</Text>
+        </TouchableOpacity>
+      </View>
+      {/* <Text style={styles.or}>Or</Text>
+      <Button title="Send Messages" onPress={send} /> */}
     </View>
   );
 };
@@ -63,8 +148,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#fff9de",
   },
-  or: {
-    margin: 20,
+  mainButton: {
+    backgroundColor: "#a6d0de",
+    width: "80%",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginBottom: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: "#000",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
   },
   title: {
     fontSize: 24,

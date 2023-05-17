@@ -10,15 +10,88 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import React, { useState, useEffect } from "react";
+import { firebase } from "../config";
 
 export default function Home() {
   const navigation = useNavigation();
   const [newsData, setNewsData] = useState([]);
+  const [userIDs, setUserIDs] = useState([]);
 
   const start = () => {
-    navigation.navigate("Chat");
+    if (userIDs.length > 0) {
+      const filteredUserIDs = userIDs.filter(
+        (id) => id !== firebase.auth().currentUser.uid
+      );
+      if (filteredUserIDs.length > 0) {
+        const randomIndex = Math.floor(Math.random() * filteredUserIDs.length);
+        const targetId = filteredUserIDs[randomIndex];
+        navigation.navigate("Chat", { targetId });
+      } else {
+        console.log("No available user IDs (filteredUserIDs)"); // Tidak ada user ID yang tersedia setelah difilter
+      }
+    } else {
+      console.log("No available user IDs"); // Tidak ada user ID yang tersedia
+    }
   };
 
+  useEffect(() => {
+    const messageRef = firebase.database().ref("userId");
+    const user = firebase.auth().currentUser;
+
+    messageRef.on("value", (snapshot) => {
+      const userIds = Object.keys(snapshot.toJSON());
+      setUserIDs(userIds);
+
+      if (userIds) {
+        const userIdsWithoutMe = userIds.filter((id) => id !== user.uid);
+
+        if (userIdsWithoutMe.length > 0) {
+          let targetId = null;
+
+          // Cek apakah kedua UID pengguna ada dalam daftar userIds
+          const isUserInUserIds =
+            userIdsWithoutMe.includes(user.uid) &&
+            userIdsWithoutMe.includes(targetId);
+
+          if (!isUserInUserIds) {
+            console.log("No available user IDs (isUserInUserIds)"); // Pengguna saat ini tidak ada dalam daftar user IDs setelah difilter
+            return;
+          }
+
+          const randomIndex = Math.floor(
+            Math.random() * userIdsWithoutMe.length
+          );
+          targetId = userIdsWithoutMe[randomIndex];
+
+          // Jika kedua pengguna sedang bekerja, cari ulang targetId
+          if (userIds.length > 2) {
+            let isTargetIdFound = false;
+
+            while (!isTargetIdFound) {
+              const newRandomIndex = Math.floor(
+                Math.random() * userIdsWithoutMe.length
+              );
+              targetId = userIdsWithoutMe[newRandomIndex];
+
+              if (
+                targetId !== user.uid &&
+                targetId !== targetId &&
+                userIdsWithoutMe.includes(targetId)
+              ) {
+                isTargetIdFound = true;
+              }
+            }
+          }
+
+          console.log("array", targetId); // Menampilkan targetId yang ditemukan
+        } else {
+          console.log("No available user IDs (userIdsWithoutMe)"); // Tidak ada user ID yang tersedia setelah penghapusan user saat ini
+        }
+      } else {
+        console.log("No available user IDs"); // Tidak ada user ID yang tersedia
+      }
+    });
+  }, []);
   const fetchNews = async () => {
     try {
       const response = await axios.get(

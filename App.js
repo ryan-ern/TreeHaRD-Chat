@@ -19,7 +19,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Regis"
+        initialRouteName="Login"
         screenOptions={{
           headerShown: false,
         }}
