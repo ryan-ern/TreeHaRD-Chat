@@ -58,6 +58,7 @@ const ChatScreen = () => {
       if (chatData) {
         const messages = Object.values(chatData);
         setChatMessages(messages);
+        scrollToBottom;
       } else {
         setChatMessages([]);
       }
@@ -261,7 +262,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     backgroundColor: "#a6d0dd",
-    marginLeft: -55,
+    marginLeft: 0,
     borderRadius: 20,
     marginRight: 10,
   },
